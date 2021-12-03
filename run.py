@@ -6,7 +6,7 @@ Wrapper for running core directly.
 
 :author:     Martin Dočekal
 """
-from core.__main__ import main
+from mag.__main__ import main
 
 if __name__ == '__main__':
     main()
