@@ -8,15 +8,17 @@ import argparse
 import atexit
 import json
 import logging
+import math
 import re
+import statistics
 import sys
 from collections import defaultdict
 from multiprocessing import active_children
-from typing import Dict, Any, Optional, TextIO
+from typing import Dict, Any, Optional, TextIO, Tuple
 
 from tqdm import tqdm
 from windpyutils.args import ExceptionsArgumentParser, ArgumentParserError
-from windpyutils.visual.text import print_histogram
+from windpyutils.visual.text import print_histogram, print_buckets_histogram
 
 from mag.mag import MAG
 
@@ -59,6 +61,12 @@ class ArgumentsManager(object):
                                   type=str)
         stats_parser.set_defaults(func=stats)
 
+        fields_of_study_score_stats_parser = subparsers.add_parser("fields-of-study-score-stats",
+                                                                   help="Score stats for fields of study.")
+        fields_of_study_score_stats_parser.add_argument("file", help="Path to file with mapping of papers to their"
+                                                                     " fields of study.", type=str)
+        fields_of_study_score_stats_parser.set_defaults(func=fields_of_study_score_stats)
+
         if len(sys.argv) < 2:
             parser.print_help()
             return None
@@ -72,6 +80,43 @@ class ArgumentsManager(object):
             return None
 
         return parsed
+
+
+def calc_fields_of_study_score_stats(f: TextIO) -> Tuple[float, float, Dict[float, int]]:
+    """
+    Score stats for fields of study.
+
+    :param f: opened field with mapping of papers to their fields of study
+    :return: Tuple:
+        mean score
+        median score
+        histogram of scores
+            with resolution on first decimal place
+    """
+
+    hist = defaultdict(int)
+    scores = []
+
+    for line in tqdm(f):
+        score = float(line.split("\t")[2])
+        hist[math.floor(score * 10)/10.0] += 1
+        scores.append(score)
+
+    return statistics.mean(scores), statistics.median(scores), hist
+
+
+def fields_of_study_score_stats(args: argparse.Namespace):
+    """
+    Score stats for fields of study.
+
+    :param args: User arguments.
+    """
+
+    with open(args.file) as f:
+        mean, median, hist = calc_fields_of_study_score_stats(f)
+        print(f"Mean: {mean}")
+        print(f"Median: {median}")
+        print_buckets_histogram(hist, buckets=min(10, len(hist)))
 
 
 def create_full(args: argparse.Namespace):
