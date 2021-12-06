@@ -42,11 +42,11 @@ class ArgumentsManager(object):
         subparsers = parser.add_subparsers()
 
         full_parser = subparsers.add_parser("full",
-                                                      help="Creates from original MAG files. Full records jsonl files "
-                                                           "containing samples with mag id, title, year, authors, "
-                                                           "references, and fields of study. If any of these fields "
-                                                           "is missing than the whole record is skipped."
-                                                           "Results are at stdout")
+                                            help="Creates from original MAG files. Full records jsonl files "
+                                                 "containing samples with mag id, title, year, authors, "
+                                                 "references, and fields of study. If any of these fields "
+                                                 "is missing than the whole record is skipped."
+                                                 "Results are at stdout")
         full_parser.add_argument("mag", help="Path to root folder, this root folder should contain mag and advanced "
                                              "folders.", type=str)
         full_parser.add_argument("--field-of-study-threshold",
@@ -56,7 +56,7 @@ class ArgumentsManager(object):
 
         stats_parser = subparsers.add_parser("stats", help="Statistics for mag.")
         stats_parser.add_argument("full", help="Path to full record jsonl MAG file. "
-                                              "You can obtain it be the full argument.", type=str)
+                                               "You can obtain it be the full argument.", type=str)
         stats_parser.add_argument("--title-filter", help="Python regex for title. Can be used for filtration.",
                                   type=str)
         stats_parser.set_defaults(func=stats)
@@ -99,7 +99,7 @@ def calc_fields_of_study_score_stats(f: TextIO) -> Tuple[float, float, Dict[floa
 
     for line in tqdm(f):
         score = float(line.split("\t")[2])
-        hist[math.floor(score * 10)/10.0] += 1
+        hist[math.floor(score * 10) / 10.0] += 1
         scores.append(score)
 
     return statistics.mean(scores), statistics.median(scores), hist
@@ -129,10 +129,9 @@ def create_full(args: argparse.Namespace):
 
     :param args: User arguments.
     """
-    mag = MAG(args.mag)
-
-    for record in tqdm(mag.gen_full_records(args.field_of_study_threshold), desc="Generating full records"):
-        print(json.dumps(record))
+    with MAG(args.mag) as mag:
+        for record in tqdm(mag.gen_full_records(args.field_of_study_threshold), desc="Generating full records"):
+            print(json.dumps(record))
 
 
 def stats_count(f: TextIO, title_filter: Optional[str] = None) -> Dict[str, Any]:
@@ -152,6 +151,7 @@ def stats_count(f: TextIO, title_filter: Optional[str] = None) -> Dict[str, Any]
     passed_filter_cnt = 0
     year_hist = defaultdict(int)
     fields_hist = defaultdict(int)
+    reference_cnt_hist = defaultdict(int)
 
     for line in f:
         total_cnt += 1
@@ -163,11 +163,14 @@ def stats_count(f: TextIO, title_filter: Optional[str] = None) -> Dict[str, Any]
             for field in record["Fields"]:
                 fields_hist[field] += 1
 
+            reference_cnt_hist[len(record["References"])] += 1
+
     return {
         "total_cnt": total_cnt,
         "passed_filter_cnt": passed_filter_cnt,
         "year_hist": year_hist,
-        "fields_hist": fields_hist
+        "fields_hist": fields_hist,
+        "references_cnt_hist": reference_cnt_hist
     }
 
 
@@ -188,6 +191,9 @@ def stats(args: argparse.Namespace):
 
     print("\nFields of study")
     print_histogram(sorted(stats_res["fields_hist"].items(), key=lambda x: x[1], reverse=True))
+
+    print("\nReferences cnt")
+    print_histogram(sorted(stats_res["references_cnt_hist"].items(), key=lambda x: x[1], reverse=True))
 
 
 def kill_children():

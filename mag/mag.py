@@ -5,12 +5,13 @@ This module contains class for reading Microsoft Academic Graph.
 
 :author:     Martin Dočekal
 """
+import logging
 import math
 import multiprocessing
 import sys
-from collections import Generator, defaultdict
+from collections import defaultdict
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Type, Optional, Sequence, Callable
+from typing import List, Tuple, Dict, Any, Type, Optional, Sequence, Callable, Generator, TextIO
 
 from mag.utils import bin_search
 
@@ -107,6 +108,27 @@ class MAG:
         self._path = Path(p)
         self._mag_path = self._path.joinpath("mag")
         self._advanced_path = self._path.joinpath("advanced")
+        self._opened_files = {}
+
+    def __enter__(self) -> "MAG":
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        for _, f in self._opened_files.items():
+            f.close()
+
+        self._opened_files = {}
+
+    def _open_file(self, p: str) -> TextIO:
+        """
+        Opens file on given path for reading. If the file was already opened it does not open it again.
+        """
+        try:
+            return self._opened_files[p]
+        except KeyError:
+            self._opened_files[p] = open(p, "r")
+
+        return self._opened_files[p]
 
     @staticmethod
     def convert_row(row: str, schema: List[Tuple[str, Type]]) -> Dict[str, Any]:
@@ -118,7 +140,7 @@ class MAG:
         :param schema: the schema that is used
         :return: converted row
         """
-        row = row.rstrip("\n").rstrip("\r").split("\t")
+        row = row.rstrip("\n").split("\t")
         res = {}
         for i, (column, c_type) in enumerate(schema):
             try:
@@ -135,18 +157,19 @@ class MAG:
         return res
 
     @property
-    def papers(self) -> Generator[Dict[str, Any]]:
+    def papers(self) -> Generator[Dict[str, Any], None, None]:
         """
         Returns generator of papers.
 
         See PAPERS_SCHEMA for more info about its content.
         """
 
-        with open(str(self._mag_path.joinpath("Papers.txt"))) as f:
-            for row in f:
-                yield self.convert_row(row, PAPERS_SCHEMA)
+        f = self._open_file(str(self._mag_path.joinpath("Papers.txt")))
 
-    def paper_author_affiliations(self, f_offset: Optional[int] = None) -> Generator[Dict[str, Any]]:
+        for row in f:
+            yield self.convert_row(row, PAPERS_SCHEMA)
+
+    def paper_author_affiliations(self, f_offset: Optional[int] = None) -> Generator[Dict[str, Any], None, None]:
         """
         Returns data frame of paper_author_affiliations.
 
@@ -154,14 +177,14 @@ class MAG:
 
         :param f_offset: If you pass this argument the file offset will be shifted to that value before generating.
         """
+        f = self._open_file(str(self._mag_path.joinpath("PaperAuthorAffiliations.txt")))
 
-        with open(str(self._mag_path.joinpath("PaperAuthorAffiliations.txt"))) as f:
-            if f_offset is not None:
-                f.seek(f_offset)
-            for row in f:
-                yield self.convert_row(row, PAPER_AUTHOR_AFFILIATIONS_SCHEMA)
+        if f_offset is not None:
+            f.seek(f_offset)
+        for row in f:
+            yield self.convert_row(row, PAPER_AUTHOR_AFFILIATIONS_SCHEMA)
 
-    def paper_references(self, f_offset: Optional[int] = None) -> Generator[Dict[str, Any]]:
+    def paper_references(self, f_offset: Optional[int] = None) -> Generator[Dict[str, Any], None, None]:
         """
         Returns generator of paper references.
 
@@ -169,14 +192,14 @@ class MAG:
 
         :param f_offset: If you pass this argument the file offset will be shifted to that value before generating.
         """
+        f = self._open_file(str(self._mag_path.joinpath("PaperReferences.txt")))
 
-        with open(str(self._mag_path.joinpath("PaperReferences.txt"))) as f:
-            if f_offset is not None:
-                f.seek(f_offset)
-            for row in f:
-                yield self.convert_row(row, PAPER_REFERENCES)
+        if f_offset is not None:
+            f.seek(f_offset)
+        for row in f:
+            yield self.convert_row(row, PAPER_REFERENCES)
 
-    def fields_of_study(self, f_offset: Optional[int] = None) -> Generator[Dict[str, Any]]:
+    def fields_of_study(self, f_offset: Optional[int] = None) -> Generator[Dict[str, Any], None, None]:
         """
         Returns generator of fields of study.
 
@@ -184,14 +207,14 @@ class MAG:
 
         :param f_offset: If you pass this argument the file offset will be shifted to that value before generating.
         """
+        f = self._open_file(str(self._advanced_path.joinpath("FieldsOfStudy.txt")))
 
-        with open(str(self._advanced_path.joinpath("FieldsOfStudy.txt"))) as f:
-            if f_offset is not None:
-                f.seek(f_offset)
-            for row in f:
-                yield self.convert_row(row, FIELDS_OF_STUDY)
+        if f_offset is not None:
+            f.seek(f_offset)
+        for row in f:
+            yield self.convert_row(row, FIELDS_OF_STUDY)
 
-    def paper_fields_of_study(self, f_offset: Optional[int] = None) -> Generator[Dict[str, Any]]:
+    def paper_fields_of_study(self, f_offset: Optional[int] = None) -> Generator[Dict[str, Any], None, None]:
         """
         Returns generator of paper fields of study.
 
@@ -199,12 +222,12 @@ class MAG:
 
         :param f_offset: If you pass this argument the file offset will be shifted to that value before generating.
         """
+        f = self._open_file(str(self._advanced_path.joinpath("PaperFieldsOfStudy.txt")))
 
-        with open(str(self._advanced_path.joinpath("PaperFieldsOfStudy.txt"))) as f:
-            if f_offset is not None:
-                f.seek(f_offset)
-            for row in f:
-                yield self.convert_row(row, PAPER_FIELDS_OF_STUDY)
+        if f_offset is not None:
+            f.seek(f_offset)
+        for row in f:
+            yield self.convert_row(row, PAPER_FIELDS_OF_STUDY)
 
     @staticmethod
     def make_index(p: str) -> Optional[Tuple[List[int], List[int]]]:
@@ -302,6 +325,7 @@ class MAG:
 
         indexes = []
         indexes_offsets = []
+        logging.log(logging.INFO, "Creating file indexes for PaperAuthorAffiliations.txt and PaperReferences.txt.")
         with multiprocessing.Pool(min(2, multiprocessing.cpu_count())) as pool:
             paths = [
                 str(self._mag_path.joinpath("PaperAuthorAffiliations.txt")),
@@ -317,17 +341,19 @@ class MAG:
         authors_paper_ids_index, authors_paper_ids_index_offsets = indexes[0], indexes_offsets[0]
         paper_references_index, paper_references_index_offsets = indexes[1], indexes_offsets[1]
 
+        logging.log(logging.INFO, "reading FieldsOfStudy")
         fields_of_study = {
             fields_of_study_row["FieldOfStudyId"]: fields_of_study_row["DisplayName"]
             for fields_of_study_row in self.fields_of_study()
         }
 
         papers_fields_of_study = defaultdict(list)
-
+        logging.log(logging.INFO, "reading PaperFieldsOfStudy")
         for row in self.paper_fields_of_study():
             if row["Score"] > field_of_study_score_threshold:
                 papers_fields_of_study[row["PaperId"]].append(row["FieldOfStudyId"])
 
+        logging.log(logging.INFO, "generating")
         for paper_row in self.papers:
             if not(paper_row["PaperId"] and paper_row["OriginalTitle"] and paper_row["Year"]):
                 # we are interested only in the full records

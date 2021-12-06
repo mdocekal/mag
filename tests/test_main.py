@@ -30,7 +30,8 @@ class TestStatsCount(unittest.TestCase):
                     "total_cnt": 7,
                     "passed_filter_cnt": 7,
                     "year_hist": {2020: 1, 2013: 1, 2004: 1, 1989: 1, 2009: 2, 2011: 1},
-                    "fields_hist": {"IT": 7, "Literature": 7}
+                    "fields_hist": {"IT": 7, "Literature": 7},
+                    "references_cnt_hist": {1: 7}
                 },
                 stats_res
             )
@@ -43,7 +44,8 @@ class TestStatsCount(unittest.TestCase):
                     "total_cnt": 7,
                     "passed_filter_cnt": 2,
                     "year_hist": {2004: 1, 1989: 1},
-                    "fields_hist": {"IT": 2, "Literature": 2}
+                    "fields_hist": {"IT": 2, "Literature": 2},
+                    "references_cnt_hist": {1: 2}
                 },
                 stats_res
             )

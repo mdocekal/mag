@@ -34,9 +34,10 @@ class TestMagGenFullRecords(unittest.TestCase):
 
         shutil.copytree(MAG_FIXTURE_PATH, MAG_TMP_PATH)
 
-        self.mag = MAG(MAG_TMP_PATH)
+        self.mag = MAG(MAG_TMP_PATH).__enter__()
 
     def tearDown(self) -> None:
+        self.mag.__exit__(None, None, None)
         self.clear_tmp()
 
     @staticmethod
@@ -80,7 +81,10 @@ class TestUpdateMagPaperAuthorAffiliationsNotInOrder(TestMagGenFullRecords):
         shutil.copytree(MAG_PAPER_AUTHOR_AFFILIATIONS_NOT_IN_ORDER_FIXTURE_PATH,
                         MAG_PAPER_AUTHOR_AFFILIATIONS_NOT_IN_ORDER_TMP_PATH)
 
-        self.mag = MAG(MAG_PAPER_AUTHOR_AFFILIATIONS_NOT_IN_ORDER_TMP_PATH)
+        self.mag = MAG(MAG_PAPER_AUTHOR_AFFILIATIONS_NOT_IN_ORDER_TMP_PATH).__enter__()
+
+    def tearDown(self) -> None:
+        self.mag.__exit__(None, None, None)
 
     def test_update(self):
         with self.assertRaises(RuntimeError):
