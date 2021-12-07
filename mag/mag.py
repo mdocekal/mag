@@ -320,26 +320,17 @@ class MAG:
 
         :param field_of_study_score_threshold: The score of field of study must be greater than this.
         :return: Generator of dicts.
-        :raise RuntimeError: Violation of non-decreasing property for Papers or PaperAuthorAffiliations
         """
 
-        indexes = []
-        indexes_offsets = []
-        logging.log(logging.INFO, "Creating file indexes for PaperAuthorAffiliations.txt and PaperReferences.txt.")
-        with multiprocessing.Pool(min(2, multiprocessing.cpu_count())) as pool:
-            paths = [
-                str(self._mag_path.joinpath("PaperAuthorAffiliations.txt")),
-                str(self._mag_path.joinpath("PaperReferences.txt"))
-            ]
-            for i, res in enumerate(pool.imap(self.make_index, paths)):
-                if res is None:
-                    raise RuntimeError(f"Violation of non-decreasing property for {paths[i]}")
-                index, index_offsets = res
-                indexes.append(index)
-                indexes_offsets.append(index_offsets)
+        logging.log(logging.INFO, "reading PaperAuthorAffiliations")
+        paper_authors = defaultdict(list)
+        for row in self.paper_author_affiliations():
+            paper_authors[row["PaperId"]].append(row["OriginalAuthor"])
 
-        authors_paper_ids_index, authors_paper_ids_index_offsets = indexes[0], indexes_offsets[0]
-        paper_references_index, paper_references_index_offsets = indexes[1], indexes_offsets[1]
+        logging.log(logging.INFO, "reading PaperReferences")
+        paper_references = defaultdict(list)
+        for row in self.paper_references():
+            paper_references[row["PaperId"]].append(row["PaperReferenceId"])
 
         logging.log(logging.INFO, "reading FieldsOfStudy")
         fields_of_study = {
@@ -360,43 +351,19 @@ class MAG:
                 continue
 
             try:
-                fields = papers_fields_of_study[paper_row["PaperId"]]
-                fields = [fields_of_study[f_id] for f_id in fields]
+                fields = [fields_of_study[field_id] for field_id in papers_fields_of_study[paper_row["PaperId"]]]
+                authors = paper_authors[paper_row["PaperId"]]
+                references = paper_references[paper_row["PaperId"]]
             except KeyError:
-                fields = []
-            if len(fields) == 0:
-                # we are interested only in the full records
+                #  we are interested only in the full records
                 continue
 
-            authors = self.search_field_for_paper(
-                paper_row["PaperId"],
-                authors_paper_ids_index,
-                authors_paper_ids_index_offsets,
-                self.paper_author_affiliations,
-                "OriginalAuthor",
-                True
-            )
-            if len(authors) == 0:
-                # we are interested only in the full records
-                continue
-
-            references = self.search_field_for_paper(
-                paper_row["PaperId"],
-                paper_references_index,
-                paper_references_index_offsets,
-                self.paper_references,
-                "PaperReferenceId"
-            )
-
-            if len(references) == 0:
-                # we are interested only in the full records
-                continue
-
-            yield {
-                    "PaperId": paper_row["PaperId"],
-                    "OriginalTitle": paper_row["OriginalTitle"],
-                    "Year": paper_row["Year"],
-                    "Authors": authors,
-                    "References": references,
-                    "Fields": fields
-                }
+            if fields and authors and references:
+                yield {
+                        "PaperId": paper_row["PaperId"],
+                        "OriginalTitle": paper_row["OriginalTitle"],
+                        "Year": paper_row["Year"],
+                        "Authors": authors,
+                        "References": references,
+                        "Fields": fields
+                    }

@@ -74,22 +74,5 @@ class TestMagGenFullRecords(unittest.TestCase):
         ], res)
 
 
-class TestUpdateMagPaperAuthorAffiliationsNotInOrder(TestMagGenFullRecords):
-    def setUp(self) -> None:
-        self.clear_tmp()
-
-        shutil.copytree(MAG_PAPER_AUTHOR_AFFILIATIONS_NOT_IN_ORDER_FIXTURE_PATH,
-                        MAG_PAPER_AUTHOR_AFFILIATIONS_NOT_IN_ORDER_TMP_PATH)
-
-        self.mag = MAG(MAG_PAPER_AUTHOR_AFFILIATIONS_NOT_IN_ORDER_TMP_PATH).__enter__()
-
-    def tearDown(self) -> None:
-        self.mag.__exit__(None, None, None)
-
-    def test_update(self):
-        with self.assertRaises(RuntimeError):
-            _ = list(self.mag.gen_full_records())
-
-
 if __name__ == '__main__':
     unittest.main()
