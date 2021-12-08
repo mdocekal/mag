@@ -153,9 +153,10 @@ def stats_count(f: TextIO, title_filter: Optional[str] = None) -> Dict[str, Any]
     fields_hist = defaultdict(int)
     reference_cnt_hist = defaultdict(int)
 
-    for line in f:
+    for line in tqdm(f):
         total_cnt += 1
         record = json.loads(line)
+
         if not title_filter or re.match(title_filter, record["OriginalTitle"]):
             passed_filter_cnt += 1
             year_hist[record["Year"]] += 1
@@ -181,7 +182,9 @@ def stats(args: argparse.Namespace):
     :param args: User arguments.
     """
 
-    stats_res = stats_count(args.full, args.title_filter)
+    with open(args.full, "r") as f:
+        stats_res = stats_count(f, args.title_filter)
+
     print(f"Total number of records:\t{stats_res['total_cnt']}")
     print(f"Total number of records that passed through the filter:\t{stats_res['passed_filter_cnt']}")
     print(f"Total number of records that passed through the filter:\t{stats_res['passed_filter_cnt']}")
