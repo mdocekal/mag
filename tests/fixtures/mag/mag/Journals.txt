@@ -1,0 +1,12 @@
+180813306	12410	international tinnitus journal	International Tinnitus Journal	0946-5448		http://www.tinnitusjournal.com/	687	687	5526	2016-06-24
+182543122	11133	anthropos	Anthropos				3448	3448	3026	2016-06-24
+186126824	10679	graphs and combinatorics	Graphs and Combinatorics	0911-0119			2606	2606	20961	2016-06-24
+186663817	10831	yale french studies	Yale French Studies	0044-0078		http://frenchstudies.research.yale.edu//	1503	1503	7414	2016-06-24
+190629608	11667	algorithms	Algorithms	1999-4893		http://www.mdpi.com/journal/algorithms	1674	1674	9999	2016-06-24
+196718495	12714	king s law journal	King's Law Journal	0961-5768		http://www.hartjournals.co.uk/klj/	705	705	950	2016-06-24
+204851967	10711	european journal of combinatorics	European Journal of Combinatorics	0195-6698		http://www.sciencedirect.com/science/journal/01956698	2047	2047	18926	2016-06-24
+207922018	11450	intelligenza artificiale	Intelligenza Artificiale	1724-8035			2868	2868	1330	2016-06-24
+972691842	13839	sociological theory and methods	Sociological Theory and Methods	0913-1442			231	231	325	2016-06-24
+1022427805	16704	tichodroma	Tichodroma	2421-261X			16	16	1	2016-06-24
+2492493267	14338	security informatics	Security Informatics	2190-8532			76	76	1150	2016-08-23
+2494786546	13625	smart learning environments	Smart Learning Environments	2196-7091	SpringerOpen	https://slejournal.springeropen.com	168	168	2587	2016-08-23

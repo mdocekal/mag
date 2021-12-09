@@ -187,16 +187,15 @@ def stats(args: argparse.Namespace):
 
     print(f"Total number of records:\t{stats_res['total_cnt']}")
     print(f"Total number of records that passed through the filter:\t{stats_res['passed_filter_cnt']}")
-    print(f"Total number of records that passed through the filter:\t{stats_res['passed_filter_cnt']}")
 
     print("\nYears")
-    print_histogram(sorted(stats_res["year_hist"].items(), key=lambda x: x[1], reverse=True))
+    print_buckets_histogram(stats_res["year_hist"], bucket_size_int=True)
 
     print("\nFields of study")
     print_histogram(sorted(stats_res["fields_hist"].items(), key=lambda x: x[1], reverse=True))
 
     print("\nReferences cnt")
-    print_histogram(sorted(stats_res["references_cnt_hist"].items(), key=lambda x: x[1], reverse=True))
+    print_buckets_histogram(stats_res["references_cnt_hist"], bucket_size_int=True)
 
 
 def kill_children():

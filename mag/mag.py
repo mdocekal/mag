@@ -89,6 +89,20 @@ PAPER_FIELDS_OF_STUDY = [
     ("Score", float)
 ]
 
+JOURNALS = [
+    ("JournalId", int),
+    ("Rank", int),
+    ("NormalizedName", str),
+    ("DisplayName", str),
+    ("Issn", str),
+    ("Publisher", str),
+    ("Webpage", str),
+    ("PaperCount", int),
+    ("PaperFamilyCount", int),
+    ("CitationCount", int),
+    ("CreatedDate", str)
+]
+
 
 class MAG:
     """
@@ -229,6 +243,21 @@ class MAG:
         for row in f:
             yield self.convert_row(row, PAPER_FIELDS_OF_STUDY)
 
+    def journals(self, f_offset: Optional[int] = None) -> Generator[Dict[str, Any], None, None]:
+        """
+        Returns generator of journals.
+
+        See JOURNALS for more info about its content.
+
+        :param f_offset: If you pass this argument the file offset will be shifted to that value before generating.
+        """
+        f = self._open_file(str(self._mag_path.joinpath("Journals.txt")))
+
+        if f_offset is not None:
+            f.seek(f_offset)
+        for row in f:
+            yield self.convert_row(row, JOURNALS)
+
     @staticmethod
     def make_index(p: str) -> Optional[Tuple[List[int], List[int]]]:
         """
@@ -344,6 +373,11 @@ class MAG:
             if row["Score"] > field_of_study_score_threshold:
                 papers_fields_of_study[row["PaperId"]].append(row["FieldOfStudyId"])
 
+        journals = defaultdict(str)
+        logging.log(logging.INFO, "reading Journals")
+        for row in self.journals():
+            journals[row["JournalId"]] = row["DisplayName"]
+
         logging.log(logging.INFO, "generating")
         for paper_row in self.papers:
             if not(paper_row["PaperId"] and paper_row["OriginalTitle"] and paper_row["Year"]):
@@ -365,5 +399,7 @@ class MAG:
                         "Year": paper_row["Year"],
                         "Authors": authors,
                         "References": references,
-                        "Fields": fields
+                        "Fields": fields,
+                        "Doi": paper_row["Doi"],
+                        "Journal": journals[paper_row["JournalId"]] if paper_row["JournalId"] in journals else ""
                     }

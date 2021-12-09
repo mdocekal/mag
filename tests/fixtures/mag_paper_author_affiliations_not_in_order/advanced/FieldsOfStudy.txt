@@ -1,5 +1,0 @@
-1	2	it  IT  unknown 1	2	3	4	unknown
-2	3	biology  Biology  unknown 1	2	3	4	unknown
-3	4	math  Math  unknown 1	2	3	4	unknown
-4	5	medicine  Medicine  unknown 1	2	3	4	unknown
-5	6	literature  Literature  unknown 1	2	3	4	unknown

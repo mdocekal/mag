@@ -49,7 +49,7 @@ class TestMagGenFullRecords(unittest.TestCase):
                 else:
                     f.unlink()
 
-    def test_update(self):
+    def test_gen_full_records(self):
 
         res = list(self.mag.gen_full_records())
 
@@ -60,7 +60,9 @@ class TestMagGenFullRecords(unittest.TestCase):
                 "Year": 2013,
                 "Authors": ["Lakos Zoltán"],
                 "References": [5],
-                "Fields": ["IT"]
+                "Fields": ["IT"],
+                "Doi": "10.3233/978-1-58603-957-8-354",
+                "Journal": "European Journal of Combinatorics"
             },
             {
                 "PaperId": 4302047,
@@ -69,7 +71,9 @@ class TestMagGenFullRecords(unittest.TestCase):
                 "Year": 2009,
                 "Authors": ["Bottyán Zsolt"],
                 "References": [6, 7],
-                "Fields": ["Biology"]
+                "Fields": ["Biology"],
+                "Doi": "",
+                "Journal": ""
             }
         ], res)
 
