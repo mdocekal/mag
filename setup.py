@@ -14,7 +14,7 @@ with open("requirements.txt") as f:
 
 setup_args = dict(
     name='mag',
-    version='1.0.0',
+    version='0.9.0',
     description='Package for working with MAG dataset.',
     long_description_content_type="text/markdown",
     long_description=README,

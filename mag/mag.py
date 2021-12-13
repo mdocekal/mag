@@ -7,7 +7,6 @@ This module contains class for reading Microsoft Academic Graph.
 """
 import logging
 import math
-import multiprocessing
 import sys
 from collections import defaultdict
 from pathlib import Path
