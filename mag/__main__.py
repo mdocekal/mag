@@ -6,6 +6,7 @@ Created on 03.12.21
 """
 import argparse
 import atexit
+import csv
 import json
 import logging
 import math
@@ -45,10 +46,11 @@ class ArgumentsManager(object):
                                             help="Creates from original MAG files. Full records jsonl files "
                                                  "containing samples with mag id, title, year, authors, "
                                                  "references, and fields of study. If any of these fields "
-                                                 "is missing than the whole record is skipped."
-                                                 "Results are at stdout")
+                                                 "is missing than the whole record is skipped.")
         full_parser.add_argument("mag", help="Path to root folder, this root folder should contain mag and advanced "
                                              "folders.", type=str)
+        full_parser.add_argument("res", help="Path to file with results. It will also creates *.index file for it.",
+                                 type=str)
         full_parser.add_argument("--field-of-study-threshold",
                                  help="The score of field of study must be greater than this.",
                                  type=float)
@@ -129,9 +131,15 @@ def create_full(args: argparse.Namespace):
 
     :param args: User arguments.
     """
-    with MAG(args.mag) as mag:
-        for record in tqdm(mag.gen_full_records(args.field_of_study_threshold), desc="Generating full records"):
-            print(json.dumps(record))
+    with open(args.res, "w") as res_f, open(args.res + ".index", "w") as res_index_f:
+
+        index_writer = csv.DictWriter(res_index_f, fieldnames=["key", "file_line_offset"], delimiter="\t")
+        index_writer.writeheader()
+
+        with MAG(args.mag) as mag:
+            for record in tqdm(mag.gen_full_records(args.field_of_study_threshold), desc="Generating full records"):
+                print(json.dumps(record), file=res_f)
+                index_writer.writerow({"key": record["PaperId"], "file_line_offset": res_f.tell()})
 
 
 def stats_count(f: TextIO, title_filter: Optional[str] = None) -> Dict[str, Any]:
