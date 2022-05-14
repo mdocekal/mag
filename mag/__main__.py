@@ -138,8 +138,8 @@ def create_full(args: argparse.Namespace):
 
         with MAG(args.mag) as mag:
             for record in tqdm(mag.gen_full_records(args.field_of_study_threshold), desc="Generating full records"):
-                print(json.dumps(record), file=res_f)
                 index_writer.writerow({"key": record["PaperId"], "file_line_offset": res_f.tell()})
+                print(json.dumps(record), file=res_f)
 
 
 def stats_count(f: TextIO, title_filter: Optional[str] = None) -> Dict[str, Any]:
