@@ -344,7 +344,7 @@ class MAG:
         """
         Generates tuple with mag id, title, year, authors, references, and fields of study.
 
-        If any of these fields is missing than the whole record is skipped.
+        If id, title, or authors are missing the whole record is skipped.
 
         :param field_of_study_score_threshold: The score of field of study must be greater than this.
         :return: Generator of dicts.
@@ -379,26 +379,32 @@ class MAG:
 
         logging.log(logging.INFO, "generating")
         for paper_row in self.papers:
-            if not(paper_row["PaperId"] and paper_row["OriginalTitle"] and paper_row["Year"]):
+            if not(paper_row["PaperId"] and paper_row["OriginalTitle"]):
                 # we are interested only in the full records
                 continue
 
             try:
-                fields = [fields_of_study[field_id] for field_id in papers_fields_of_study[paper_row["PaperId"]]]
                 authors = paper_authors[paper_row["PaperId"]]
-                references = paper_references[paper_row["PaperId"]]
             except KeyError:
                 #  we are interested only in the full records
                 continue
 
-            if fields and authors and references:
+            fields = []
+            if paper_row["PaperId"] in papers_fields_of_study:
+                fields = [fields_of_study[field_id] for field_id in papers_fields_of_study[paper_row["PaperId"]]]
+
+            references = []
+            if paper_row["PaperId"] in paper_references:
+                references = paper_references[paper_row["PaperId"]]
+
+            if authors:
                 yield {
                         "PaperId": paper_row["PaperId"],
                         "OriginalTitle": paper_row["OriginalTitle"],
-                        "Year": paper_row["Year"],
+                        "Year": paper_row["Year"] if paper_row["Year"] else None,
                         "Authors": authors,
                         "References": references,
                         "Fields": fields,
-                        "Doi": paper_row["Doi"],
-                        "Journal": journals[paper_row["JournalId"]] if paper_row["JournalId"] in journals else ""
+                        "Doi": paper_row["Doi"] if paper_row["Doi"] else None,
+                        "Journal": journals[paper_row["JournalId"]] if paper_row["JournalId"] in journals else None
                     }

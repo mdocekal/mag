@@ -52,8 +52,27 @@ class TestMagGenFullRecords(unittest.TestCase):
     def test_gen_full_records(self):
 
         res = list(self.mag.gen_full_records())
-
         self.assertEqual([
+            {
+                "PaperId": 248996,
+                "OriginalTitle": "Sufism and Religious Practices in Modern Lifestyle",
+                "Year": 2020,
+                "Authors": ["Suraiya IT.", "Rijal, Syamsul"],
+                "References": [3],
+                "Fields": [],
+                "Doi": None,
+                "Journal": None
+            },
+            {
+                "PaperId": 760496,
+                "OriginalTitle": "Framtidas omsorgsbilde - slik det ser ut på tegnebrettet. Omsorgsplanlegging i norske kommuner. Status i 2009 - utfordringer mot 2015",
+                "Year": 2009,
+                "Authors": ["Disch, per Gunnar", "Vetvik, Einar"],
+                "References": [4],
+                "Fields": [],
+                "Doi": None,
+                "Journal": None
+            },
             {
                 "PaperId": 2789336,
                 "OriginalTitle": "Önkéntes mentőszervezetek létrehozásának specifikumai egy járás tekintetében",
@@ -65,6 +84,16 @@ class TestMagGenFullRecords(unittest.TestCase):
                 "Journal": "European Journal of Combinatorics"
             },
             {
+                "PaperId": 2257060365,
+                "OriginalTitle": "Helikopter gázturbinás hajtóművek hatásfok növelésének problémái",
+                "Year": 2011,
+                "Authors": ["Varga Béla"],
+                "References": [],
+                "Fields": ["IT"],
+                "Doi": "10.3233/978-1-58603-957-8-354",
+                "Journal": None
+            },
+            {
                 "PaperId": 4302047,
                 "OriginalTitle": "A repülésre veszélyes mezo-skálájú meteorológiai jelenségek modellezésének "
                                  "aspektusai: Numerikus prognosztikai megközelítés",
@@ -72,8 +101,8 @@ class TestMagGenFullRecords(unittest.TestCase):
                 "Authors": ["Bottyán Zsolt"],
                 "References": [6, 7],
                 "Fields": ["Biology"],
-                "Doi": "",
-                "Journal": ""
+                "Doi": None,
+                "Journal": None
             }
         ], res)
 
