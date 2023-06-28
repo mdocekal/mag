@@ -370,7 +370,7 @@ class MAG:
         logging.log(logging.INFO, "reading PaperFieldsOfStudy")
         for row in self.paper_fields_of_study():
             if row["Score"] > field_of_study_score_threshold:
-                papers_fields_of_study[row["PaperId"]].append(row["FieldOfStudyId"])
+                papers_fields_of_study[row["PaperId"]].append((row["FieldOfStudyId"], row["Score"]))
 
         journals = defaultdict(str)
         logging.log(logging.INFO, "reading Journals")
@@ -391,7 +391,9 @@ class MAG:
 
             fields = []
             if paper_row["PaperId"] in papers_fields_of_study:
-                fields = [fields_of_study[field_id] for field_id in papers_fields_of_study[paper_row["PaperId"]]]
+                fields = [
+                    (fields_of_study[field_id], score) for field_id, score in papers_fields_of_study[paper_row["PaperId"]]
+                ]
 
             references = []
             if paper_row["PaperId"] in paper_references:

@@ -79,7 +79,7 @@ class TestMagGenFullRecords(unittest.TestCase):
                 "Year": 2013,
                 "Authors": ["Lakos Zoltán"],
                 "References": [5],
-                "Fields": ["IT"],
+                "Fields": [("IT", 0.1)],
                 "Doi": "10.3233/978-1-58603-957-8-354",
                 "Journal": "European Journal of Combinatorics"
             },
@@ -89,7 +89,7 @@ class TestMagGenFullRecords(unittest.TestCase):
                 "Year": 2011,
                 "Authors": ["Varga Béla"],
                 "References": [],
-                "Fields": ["IT"],
+                "Fields": [("IT", 0.3)],
                 "Doi": "10.3233/978-1-58603-957-8-354",
                 "Journal": None
             },
@@ -100,7 +100,7 @@ class TestMagGenFullRecords(unittest.TestCase):
                 "Year": 2009,
                 "Authors": ["Bottyán Zsolt"],
                 "References": [6, 7],
-                "Fields": ["Biology"],
+                "Fields": [("Biology", 0.6)],
                 "Doi": None,
                 "Journal": None
             }
